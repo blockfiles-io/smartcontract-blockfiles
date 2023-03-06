@@ -14,7 +14,10 @@ import "@openzeppelin/contracts-upgradeable/token/ERC721/ERC721Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721EnumerableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol";
-import "@openzeppelin/contracts/utils/Strings.sol"; 
+import "@openzeppelin/contracts/utils/Strings.sol";
+
+error NotAllowed();
+error InvalidPaymentAmount();
 
 contract Blockfiles is
     ERC721Upgradeable,
@@ -26,27 +29,29 @@ contract Blockfiles is
         uint256 royaltyFee;
         uint256 maxHolders;
     }
-    address payable public constant ADDRESS_DEV      = payable(0xA8c51eEC9293b5E4E80d43a5eE7e10e707832F36);
-    address payable public constant ADDRESS_CHARITY  = payable(0xfd5bFF20BDc13E4B659dF40f4a431C0625682D01);
-    address payable public constant ADDRESS_WHISTLE  = payable(0x9D200E11D2631D7BEd8700d579e1880b0259bC73);
-    address payable public constant ADDRESS_TREASURY = payable(0xDFaD9bd60E738e29C8891d76039e1A04A9dF2273);
-    uint256 public constant CHARITY_SPLIT = 10;
+    address payable private constant ADDRESS_DEV      = payable(0xA8c51eEC9293b5E4E80d43a5eE7e10e707832F36);
+    address payable private constant ADDRESS_CHARITY  = payable(0xfd5bFF20BDc13E4B659dF40f4a431C0625682D01);
+    address payable private constant ADDRESS_WHISTLE  = payable(0x9D200E11D2631D7BEd8700d579e1880b0259bC73);
+    address payable private constant ADDRESS_TREASURY = payable(0xDFaD9bd60E738e29C8891d76039e1A04A9dF2273);
+    uint256 private constant CHARITY_SPLIT = 10;
     
-    uint256 public pricePerMB;
-    bool public uploadOpen;
+    uint256 private pricePerMB;
+    uint256 private uploadOpen; // 0 = false, 1 = true
     CountersUpgradeable.Counter private _tokenIdTracker;
-    uint256 public devSplit;
-    uint256 public whistleblowerSplit;
+    uint256 private devSplit;
+    uint256 private whistleblowerSplit;
+    uint256 private freeFilesFee;
 
-    mapping(uint256 => File) public files;
-    mapping(uint256 => string) public customMetadataUris;
+    mapping(uint256 => File) private files;
+    mapping(uint256 => string) private customMetadataUris;
 
     function initialize() public initializer {
         __ERC721_init("Blockfiles", "BFL");
         pricePerMB = 0.0002 ether;
         devSplit = 50;
         whistleblowerSplit = 10;
-        uploadOpen = true;
+        uploadOpen = 1;
+        freeFilesFee = 0.005 ether;
     }
 
     function getRoyaltyFee(uint256 tokenId) public view virtual returns (uint256) {
@@ -55,29 +60,41 @@ contract Blockfiles is
     function getMaxHolders(uint256 tokenId) public view virtual returns (uint256) {
         return files[tokenId].maxHolders;
     }
+    function getFreeFilesFee() public view virtual returns (uint256) {
+        return freeFilesFee;
+    }
 
-    function setPricePerMB(uint256 newPrice) external onlyOwner {
+    function setPricePerMB(uint256 newPrice) external payable onlyOwner {
         pricePerMB = newPrice;
     }
 
-    function setDevSplit(uint256 newSplit) external onlyOwner {
+    function setDevSplit(uint256 newSplit) external payable onlyOwner {
         devSplit = newSplit;
     }
 
-    function setWhistleblowerSplit(uint256 newSplit) external onlyOwner {
+    function setWhistleblowerSplit(uint256 newSplit) external payable onlyOwner {
         whistleblowerSplit = newSplit;
     }
 
-    function setUploadOpen(bool open) external onlyOwner {
+    function setUploadOpen(uint256 open) external payable onlyOwner {
         uploadOpen = open;
     }
 
+    function setFreeFilesFee(uint256 fee) external payable onlyOwner {
+        freeFilesFee = fee;
+    }
+
     function mint(uint256 sizeInMB, address owner, uint256 maxHolders, uint256 royaltyFee) external payable {
-        require(uploadOpen, "Public sale has not started");
-        require(
-            pricePerMB * sizeInMB == msg.value,
-            "Payment amount is incorrect"
-        );
+        if (uploadOpen == 0) {
+            revert NotAllowed();
+        }
+        uint256 expectedPrice = pricePerMB * sizeInMB;
+        if (royaltyFee == 0) {
+            expectedPrice = expectedPrice + freeFilesFee;
+        }
+        if (msg.value < expectedPrice) {
+            revert InvalidPaymentAmount();
+        }
         uint256 id = CountersUpgradeable.current(_tokenIdTracker);
         _mint(owner, id);
         files[id] = File(royaltyFee, maxHolders);
@@ -113,7 +130,7 @@ contract Blockfiles is
         super._burn(tokenId);
     }
 
-    function withdraw() public onlyOwner {
+    function withdraw() public payable onlyOwner {
         uint256 devSplitAmount = address(this).balance*devSplit/100;
         payable(ADDRESS_DEV).call{value: devSplitAmount}("");
         uint256 charitySplitAmount = address(this).balance*CHARITY_SPLIT/100;
