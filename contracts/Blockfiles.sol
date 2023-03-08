@@ -47,6 +47,7 @@ contract Blockfiles is
 
     function initialize() public initializer {
         __ERC721_init("Blockfiles", "BFL");
+        __Ownable_init();
         pricePerMB = 0.0002 ether;
         devSplit = 50;
         whistleblowerSplit = 10;
