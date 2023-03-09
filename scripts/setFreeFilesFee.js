@@ -81,7 +81,7 @@ else if (network.name == "polygon") {
     apiUrl = MAT_API_URL;
     publicKey = MAT_PUBLIC_KEY;
     privateKey = MAT_PRIVATE_KEY;
-    freeFilesFee = 7;
+    freeFilesFee = 2;
 }
 
 const { createAlchemyWeb3 } = require("@alch/alchemy-web3");

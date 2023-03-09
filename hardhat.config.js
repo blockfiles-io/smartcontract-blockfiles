@@ -16,7 +16,9 @@ const {
   MAT_API_URL,
   OPT_GOERLI_API_URL,
   OPT_PRIVATE_KEY,
+  OPT_API_URL,
   ARB_PRIVATE_KEY, 
+  ARB_API_URL,
   ARB_GOERLI_API_URL, 
   ARB_ETHERSCAN_API_KEY } = process.env;
 
@@ -49,6 +51,14 @@ module.exports = {
     polygon: {
       url: MAT_API_URL,
       accounts: [`0x${MAT_PRIVATE_KEY}`],
+    },
+    optimism: {
+      url: OPT_API_URL,
+      accounts: [`0x${OPT_PRIVATE_KEY}`],
+    },
+    arbitrum: {
+      url: ARB_API_URL,
+      accounts: [`0x${ARB_PRIVATE_KEY}`],
     }
     
   },

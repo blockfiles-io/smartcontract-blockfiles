@@ -8,6 +8,7 @@ const {
     ARB_GOERLI_CONTRACT_ADDRESS,
     OPT_GOERLI_CONTRACT_ADDRESS,
     SPH_CONTRACT_ADDRESS,
+    MAT_CONTRACT_ADDRESS,
     ETH_GOERLI_CONTRACT_ADDRESS
 } = process.env;
 
@@ -24,6 +25,9 @@ else if (network.name == "sphinx") {
 }
 else if (network.name == "goerli") {
     contractAddress = ETH_GOERLI_CONTRACT_ADDRESS;
+}
+else if (network.name == "polygon") {
+    contractAddress = MAT_CONTRACT_ADDRESS;
 }
 
 async function main() {

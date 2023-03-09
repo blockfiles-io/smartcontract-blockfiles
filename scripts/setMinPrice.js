@@ -39,7 +39,7 @@ var apiUrl = "";
 var publicKey = "";
 var privateKey = "";
 var blockfilesContractAddress= "";
-var price = 0.0002;
+var minPrice = 0.005;
 
 if (network.name == "arbGoerli") {
     contractAddress = ARB_GOERLI_CONTRACT_ADDRESS;
@@ -81,7 +81,7 @@ else if (network.name == "polygon") {
     apiUrl = MAT_API_URL;
     publicKey = MAT_PUBLIC_KEY;
     privateKey = MAT_PRIVATE_KEY;
-    price = 0.001;
+    price = 0.5;
 }
 
 const { createAlchemyWeb3 } = require("@alch/alchemy-web3");
@@ -92,7 +92,7 @@ const nftContract = new web3.eth.Contract(contract.abi, contractAddress, {
     "from": publicKey
 });
 
-async function setPricePerMB(price) {
+async function setMinPrice(price) {
     
     const nonce = await web3.eth.getTransactionCount(publicKey, "latest") //get latest nonce
 
@@ -103,7 +103,7 @@ async function setPricePerMB(price) {
     to: contractAddress,
     nonce: nonce,
     gas: 6885000,
-    data: nftContract.methods.setPricePerMB(weiAmount).encodeABI(),
+    data: nftContract.methods.setMinPrice(weiAmount).encodeABI(),
   }
 
   const signPromise = web3.eth.accounts.signTransaction(tx, privateKey)
@@ -132,4 +132,4 @@ async function setPricePerMB(price) {
     })   
 }
 
-setPricePerMB(price);
+setMinPrice(price);

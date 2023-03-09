@@ -45,14 +45,17 @@ contract Blockfiles is
     mapping(uint256 => File) private files;
     mapping(uint256 => string) private customMetadataUris;
 
+    uint256 private minPrice;
+
     function initialize() public initializer {
         __ERC721_init("Blockfiles", "BFL");
         __Ownable_init();
-        pricePerMB = 0.0002 ether;
+        pricePerMB = 0.00002 ether;
         devSplit = 50;
         whistleblowerSplit = 10;
         uploadOpen = 1;
         freeFilesFee = 0.005 ether;
+        minPrice = 0.005 ether;
     }
 
     function getRoyaltyFee(uint256 tokenId) public view virtual returns (uint256) {
@@ -67,6 +70,10 @@ contract Blockfiles is
 
     function setPricePerMB(uint256 newPrice) external payable onlyOwner {
         pricePerMB = newPrice;
+    }
+
+    function setMinPrice(uint256 newPrice) external payable onlyOwner {
+        minPrice = newPrice;
     }
 
     function setDevSplit(uint256 newSplit) external payable onlyOwner {
@@ -92,6 +99,9 @@ contract Blockfiles is
         uint256 expectedPrice = pricePerMB * sizeInMB;
         if (royaltyFee == 0) {
             expectedPrice = expectedPrice + freeFilesFee;
+        }
+        if (expectedPrice<minPrice) {
+            expectedPrice = minPrice;
         }
         if (msg.value < expectedPrice) {
             revert InvalidPaymentAmount();
