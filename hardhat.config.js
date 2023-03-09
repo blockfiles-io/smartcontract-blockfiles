@@ -7,6 +7,8 @@ require("@nomiclabs/hardhat-etherscan");
 require("@nomiclabs/hardhat-ethers");
 require('@openzeppelin/hardhat-upgrades');
 const { 
+  BASE_GOERLI_API_URL,
+  BASE_PRIVATE_KEY,
   SPH_PRIVATE_KEY, 
   API_GOERLI_URL,
   ETH_PRIVATE_KEY,
@@ -59,6 +61,10 @@ module.exports = {
     arbitrum: {
       url: ARB_API_URL,
       accounts: [`0x${ARB_PRIVATE_KEY}`],
+    },
+    baseGoerli: {
+      url: BASE_GOERLI_API_URL,
+      accounts: [`0x${BASE_PRIVATE_KEY}`],
     }
     
   },
