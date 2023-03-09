@@ -11,6 +11,9 @@ const {
   API_GOERLI_URL,
   ETH_PRIVATE_KEY,
   ETH_GOERLI_API_URL,
+  MAT_MUMBAI_API_URL,
+  MAT_PRIVATE_KEY,
+  MAT_API_URL,
   OPT_GOERLI_API_URL,
   OPT_PRIVATE_KEY,
   ARB_PRIVATE_KEY, 
@@ -38,6 +41,14 @@ module.exports = {
     optGoerli: {
       url: OPT_GOERLI_API_URL,
       accounts: [`0x${OPT_PRIVATE_KEY}`],
+    },
+    mumbai: {
+      url: MAT_MUMBAI_API_URL,
+      accounts: [`0x${MAT_PRIVATE_KEY}`],
+    },
+    polygon: {
+      url: MAT_API_URL,
+      accounts: [`0x${MAT_PRIVATE_KEY}`],
     }
     
   },
